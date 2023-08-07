@@ -1,0 +1,42 @@
+version: '3.8'
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: api
+    depends_on:
+      - postgres
+    entrypoint: sh -c 'yarn install --frozen-lockfile && yarn start:dev'
+    volumes:
+      - .:/app/
+      - /app/node_modules/
+    ports:
+      - ${PORT}:${PORT}
+    networks:
+      - umbriel-net
+
+  postgres:
+    image: postgres:${POSTGRES_VERSION}
+    container_name: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      PGDATA: /var/lib/postgresql/data/pgdata
+
+    ports:
+      - ${POSTGRES_PORT}:${POSTGRES_PORT}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - umbriel-net
+
+networks:
+  umbriel-net:
+    driver: bridge
+
+volumes:
+  postgres-data:
+    driver: local
