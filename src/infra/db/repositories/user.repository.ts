@@ -5,10 +5,16 @@ import { AddUserRepository } from '@app/data/protocols/db/user/add-user-reposito
 import { UserModel } from '@app/domain/models/user/user.model';
 import { Injectable } from '@nestjs/common';
 import { LoadUserByEmailRepository } from '@app/data/protocols/db/user/load-user-by-email-repository';
+import { LoadUsersRepository } from '@app/data/protocols/db/user/load-users-repository';
+import { LoadUserByIdRepository } from '@app/data/protocols/db/user/load-user-by-id-repository';
 
 @Injectable()
 export class UserRepository
-  implements AddUserRepository, LoadUserByEmailRepository
+  implements
+    AddUserRepository,
+    LoadUserByEmailRepository,
+    LoadUsersRepository,
+    LoadUserByIdRepository
 {
   constructor(
     @InjectRepository(UserEntity)
@@ -24,5 +30,13 @@ export class UserRepository
   async loadByEmail(email: string): Promise<UserModel> {
     const user = await this.userRepository.findOne({ where: { email } });
     return user;
+  }
+
+  async load(): Promise<UserModel[]> {
+    return await this.userRepository.find();
+  }
+
+  async loadById(id: number): Promise<UserModel> {
+    return await this.userRepository.findOne({ where: { id } });
   }
 }

@@ -1,6 +1,7 @@
 import { UserModel } from '@app/domain/models/user/user.model';
-import { AddUserParams } from '@app/domain/usecases/user/add-user/add-user';
 
-export interface AddUserRepository {
+export type AddUserParams = Partial<Omit<UserModel, 'id'>>;
+
+export interface AddUser {
   add: (data: AddUserParams) => Promise<UserModel>;
 }

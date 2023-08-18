@@ -18,7 +18,7 @@ describe('AppController (e2e)', () => {
   it('/ (GET)', () => {
     return request(app.getHttpServer())
       .get('/')
-      .expect(200)
-      .expect('Hello World!');
+      .expect(404)
+      .expect({ message: 'Cannot GET /', error: 'Not Found', statusCode: 404 });
   });
 });
