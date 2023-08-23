@@ -70,15 +70,7 @@ export class UserRepository
           }
 
           if (filterKey === 'email') {
-            const usersWithEmail = await queryBuilder
-              .where(condition)
-              .getCount();
-
-            if (usersWithEmail === 0) {
-              throw new NotFoundException(
-                'No user found with the provided email.',
-              );
-            }
+            queryBuilder = queryBuilder.where(condition);
           }
 
           queryBuilder = queryBuilder.andWhere(condition);

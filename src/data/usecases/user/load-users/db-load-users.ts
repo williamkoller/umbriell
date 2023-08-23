@@ -4,6 +4,7 @@ import { PageOptionsModel } from '@app/domain/models/user/page-options.model';
 import { UserModel } from '@app/domain/models/user/user.model';
 import { LoadUsers } from '@app/domain/usecases/user/load-users/load-users';
 import { PaginationResponseDto } from '@app/presentation/dtos/pagination/pagination.dto';
+import { NotFoundException } from '@nestjs/common';
 
 export class DbLoadUsers implements LoadUsers {
   constructor(private readonly loadUsersRepository: LoadUsersRepository) {}
@@ -12,9 +13,15 @@ export class DbLoadUsers implements LoadUsers {
     filterUserModel: FilterUserModel,
     pageOptionsModel: PageOptionsModel,
   ): Promise<PaginationResponseDto<UserModel>> {
-    return await this.loadUsersRepository.load(
-      filterUserModel,
-      pageOptionsModel,
-    );
+    const paginationResponse: PaginationResponseDto<UserModel> =
+      await this.loadUsersRepository.load(filterUserModel, pageOptionsModel);
+
+    if (paginationResponse.meta.total === 0) {
+      throw new NotFoundException(
+        `User with email ${filterUserModel.email} not found`,
+      );
+    }
+
+    return paginationResponse;
   }
 }
