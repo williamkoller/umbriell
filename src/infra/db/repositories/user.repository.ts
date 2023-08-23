@@ -64,7 +64,7 @@ export class UserRepository
             );
           }
 
-          const condition = {};
+          let condition = {};
           if (filterKey === 'email' || filterKey === 'active') {
             condition[filterKey] = filterValue;
           }
