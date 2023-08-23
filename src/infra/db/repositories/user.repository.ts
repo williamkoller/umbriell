@@ -62,16 +62,16 @@ export class UserRepository
                 surname: `%${filterValue.toUpperCase()}%`,
               },
             );
-          } else if (filterKey === 'active') {
-            queryBuilder = queryBuilder.andWhere(
-              `user.${filterKey} = :${filterKey}`,
-              { [filterKey]: filterValue },
-            );
-          } else if (filterKey === 'email') {
+          }
+
+          const condition = {};
+          if (filterKey === 'email' || filterKey === 'active') {
+            condition[filterKey] = filterValue;
+          }
+
+          if (filterKey === 'email') {
             const usersWithEmail = await queryBuilder
-              .andWhere(`user.${filterKey} = :${filterKey}`, {
-                [filterKey]: filterValue,
-              })
+              .where(condition)
               .getCount();
 
             if (usersWithEmail === 0) {
@@ -79,12 +79,9 @@ export class UserRepository
                 'No user found with the provided email.',
               );
             }
-
-            queryBuilder = queryBuilder.andWhere(
-              `user.${filterKey} = :${filterKey}`,
-              { [filterKey]: filterValue },
-            );
           }
+
+          queryBuilder = queryBuilder.andWhere(condition);
         }
       }
 
