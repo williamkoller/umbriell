@@ -10,7 +10,7 @@ import {
   PaginationResponseDto,
 } from '@app/presentation/dtos/pagination/pagination.dto';
 import { UserPresenter } from '@app/presentation/presenter/user/user.presenter';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { UserEntity } from '../entities/user.entity';
