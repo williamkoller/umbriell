@@ -13,3 +13,7 @@ RUN yarn cache clean \
 COPY . .
 
 EXPOSE 3009
+
+RUN yarn build
+
+CMD ["yarn start:prod"]
