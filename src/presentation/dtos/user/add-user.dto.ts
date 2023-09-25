@@ -1,4 +1,5 @@
 import { Match } from '@app/main/decorator/match.decorator';
+import { ApiProperty } from '@nestjs/swagger';
 import {
   IsNotEmpty,
   IsNumber,
@@ -9,10 +10,18 @@ import {
 } from 'class-validator';
 
 export class AddUserDto {
+  @ApiProperty({
+    description: 'Name of user',
+    example: 'William',
+  })
   @IsString()
   @IsNotEmpty({ message: 'Name is required' })
   name: string;
 
+  @ApiProperty({
+    description: 'Surname of user',
+    example: 'Koller',
+  })
   @IsString()
   @IsNotEmpty({ message: 'Surname is required' })
   surname: string;
@@ -21,10 +30,18 @@ export class AddUserDto {
   @IsNotEmpty({ message: 'Age is required' })
   age: number;
 
+  @ApiProperty({
+    description: 'E-mail of user',
+    example: 'william@mail.com',
+  })
   @IsString()
   @IsNotEmpty({ message: 'Email is required' })
   email: string;
 
+  @ApiProperty({
+    description: 'Password of user',
+    example: 'AnyPassword!@#',
+  })
   @IsString()
   @IsNotEmpty({ message: 'Password is required' })
   @MinLength(4)
@@ -34,6 +51,10 @@ export class AddUserDto {
   })
   password: string;
 
+  @ApiProperty({
+    description: 'passwordConfirm of user',
+    example: 'AnyPassword!@#',
+  })
   @IsString()
   @IsNotEmpty({ message: 'passwordConfirm confirm is required' })
   @MinLength(4)

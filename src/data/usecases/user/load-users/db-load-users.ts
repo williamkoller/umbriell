@@ -3,7 +3,11 @@ import { FilterUserModel } from '@app/domain/models/user/filter-user.model';
 import { PageOptionsModel } from '@app/domain/models/user/page-options.model';
 import { UserModel } from '@app/domain/models/user/user.model';
 import { LoadUsers } from '@app/domain/usecases/user/load-users/load-users';
-import { PaginationResponseDto } from '@app/presentation/dtos/pagination/pagination.dto';
+import {
+  PaginationMetaDto,
+  PaginationResponseDto,
+} from '@app/presentation/dtos/pagination/pagination.dto';
+import { UserPresenter } from '@app/presentation/presenter/user/user.presenter';
 import { NotFoundException } from '@nestjs/common';
 
 export class DbLoadUsers implements LoadUsers {
@@ -13,15 +17,32 @@ export class DbLoadUsers implements LoadUsers {
     filterUserModel: FilterUserModel,
     pageOptionsModel: PageOptionsModel,
   ): Promise<PaginationResponseDto<UserModel>> {
-    const paginationResponse: PaginationResponseDto<UserModel> =
-      await this.loadUsersRepository.load(filterUserModel, pageOptionsModel);
+    const skip =
+      (Number(pageOptionsModel.page) - 1) * Number(pageOptionsModel.perPage);
 
-    if (paginationResponse.meta.total === 0) {
-      throw new NotFoundException(
-        `User with email ${filterUserModel.email} not found`,
+    const loadUsers: { users: UserModel[]; total: number } =
+      await this.loadUsersRepository.load(
+        filterUserModel,
+        pageOptionsModel,
+        skip,
       );
+
+    if (loadUsers.total === 0) {
+      throw new NotFoundException('No records found.');
     }
 
-    return paginationResponse;
+    const page = Number(pageOptionsModel.page) || 1;
+    const perPage = Number(pageOptionsModel.perPage) || 10;
+
+    const paginationMeta: PaginationMetaDto = {
+      page,
+      perPage,
+      total: loadUsers.total,
+    };
+
+    return {
+      meta: paginationMeta,
+      data: loadUsers.users.map((user) => new UserPresenter().format(user)),
+    };
   }
 }

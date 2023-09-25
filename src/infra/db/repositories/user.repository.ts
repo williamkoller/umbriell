@@ -5,11 +5,6 @@ import { LoadUsersRepository } from '@app/data/protocols/db/user/load-users-repo
 import { FilterUserModel } from '@app/domain/models/user/filter-user.model';
 import { PageOptionsModel } from '@app/domain/models/user/page-options.model';
 import { UserModel } from '@app/domain/models/user/user.model';
-import {
-  PaginationMetaDto,
-  PaginationResponseDto,
-} from '@app/presentation/dtos/pagination/pagination.dto';
-import { UserPresenter } from '@app/presentation/presenter/user/user.presenter';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, SelectQueryBuilder } from 'typeorm';
@@ -23,6 +18,7 @@ export class UserRepository
     LoadUsersRepository,
     LoadUserByIdRepository
 {
+  private skipNumberDefault = 1;
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
@@ -42,10 +38,8 @@ export class UserRepository
   async load(
     filterUserModel: FilterUserModel,
     pageOptionsModel: PageOptionsModel,
-  ): Promise<PaginationResponseDto<UserModel>> {
-    const skip =
-      (Number(pageOptionsModel.page) - 1) * Number(pageOptionsModel.perPage);
-
+    skip: number,
+  ): Promise<{ users: UserModel[]; total: number }> {
     let queryBuilder: SelectQueryBuilder<UserEntity> =
       this.userRepository.createQueryBuilder('user');
 
@@ -77,21 +71,18 @@ export class UserRepository
         }
       }
 
+      const page = Number(pageOptionsModel.page);
+      const perPage = Number(pageOptionsModel.perPage);
+      const skipNumberDefault = this.skipNumberDefault;
+      const defaultPerPage = 10;
+      const skipDefault = Math.max(page ? page - skipNumberDefault : 0, 0);
+
       const [users, total] = await queryBuilder
-        .skip(skip)
-        .take(pageOptionsModel.perPage)
+        .skip(skip || skipDefault)
+        .take(perPage || defaultPerPage)
         .getManyAndCount();
 
-      const paginationMeta: PaginationMetaDto = {
-        page: pageOptionsModel.page,
-        perPage: pageOptionsModel.perPage,
-        total,
-      };
-
-      return {
-        meta: paginationMeta,
-        data: users.map((user) => new UserPresenter().format(user)),
-      };
+      return { users, total };
     }
   }
 
